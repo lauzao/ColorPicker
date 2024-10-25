@@ -1,0 +1,51 @@
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.DrawContext;
+import java.io.IOException;
+
+public class SaveWaypointScreen extends Screen {
+
+    // Outros componentes
+    public ColorPickerWidget colorPicker;
+
+    // Construtor da tela
+    protected SaveWaypointScreen() {
+        super(Text.literal("Salvar Waypoint"));
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        
+        // Inicializa o color picker na posição desejada
+        colorPicker = new ColorPickerWidget(width / 2 - 100, height / 2 - 50, 200, 20);
+        addDrawableChild(colorPicker);
+
+        // Outros componentes como botões de salvar e cancelar
+        // saveButton, cancelButton etc.
+    }
+
+    @Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        // Renderiza a tela e o color picker
+        super.render(context, mouseX, mouseY, delta);
+        colorPicker.render(context, mouseX, mouseY, delta);
+    }
+
+    private void saveWaypoint() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        try {
+            assert client.player != null;
+            Waypoint waypoint = new Waypoint(
+                client.player.getWorld().getRegistryKey().getValue().toString(),
+                waypointName.getText(),  // Nome do waypoint
+                client.player.getPos(),  // Posição do jogador
+                colorPicker.getSelectedColor()  // Usa a cor selecionada
+            );
+            WaypointHelper.saveNewWaypoint(waypoint);
+        } catch (IOException e) {
+            SimpleWaypoint.LOGGER.error(e.getMessage());
+        }
+        this.close();  // Fecha a tela após salvar
+    }
+}
